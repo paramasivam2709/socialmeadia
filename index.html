@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satackly | Complete Social Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        dark: { bg: '#0f172a', card: '#1e293b', border: '#334155', hover: '#283548' }
+                    },
+                    animation: {
+                        'like-bounce': 'likeBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'dropdown': 'dropdown 0.2s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        likeBounce: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.3)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideIn: {
+                            '0%': { opacity: '0', transform: 'translateX(20px)' },
+                            '100%': { opacity: '1', transform: 'translateX(0)' },
+                        },
+                        dropdown: {
+                            '0%': { opacity: '0', transform: 'translateY(-10px) scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .story-ring {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 2px;
+            border-radius: 50%;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #0ea5e9;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .tab-active {
+            color: #0ea5e9;
+            border-bottom: 2px solid #0ea5e9;
+        }
+        
+        .message-bubble {
+            position: relative;
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .message-sent {
+            background: #0ea5e9;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message-received {
+            background: #334155;
+            color: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .dropdown-menu {
+            transform-origin: top;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-menu.hidden {
+            display: none;
+        }
+        
+        .dropdown-menu:not(.hidden) {
+            animation: dropdown 0.2s ease-out forwards;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-slate-200 font-sans antialiased selection:bg-brand-500 selection:text-white overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass h-16 flex items-center justify-between px-4 lg:px-8 transition-all duration-300" id="navbar">
+        <div class="flex items-center gap-3 cursor-pointer group" onclick="router.navigate('home')">
+
+<img src="image/logo-white.png" 
+alt="Satackly Logo"
+class="h-10 w-auto object-contain hover:scale-105 transition">
+
+</div>
+
+        <div class="hidden md:flex items-center bg-dark-card rounded-full px-4 py-2 w-96 border border-dark-border focus-within:border-brand-500 focus-within:ring-1 focus-within:ring-brand-500 transition-all">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+            <input type="text" placeholder="Search Satackly..." class="bg-transparent border-none outline-none text-sm ml-3 w-full text-slate-200 placeholder-slate-500" id="global-search">
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button onclick="openLoginModal()" class="hidden md:block bg-transparent border border-brand-500 text-brand-500 hover:bg-brand-500 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300">
+                Log In
+            </button>
+            <button onclick="openLoginModal()" class="hidden md:block bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-full font-medium transition-all duration-300 shadow-lg shadow-brand-500/30">
+                Sign Up
+            </button>
+            <button class="relative p-2 text-slate-400 hover:text-white transition-colors group" onclick="router.navigate('notifications')">
+                <i class="fa-regular fa-bell text-xl"></i>
+                <span id="notif-badge" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-dark-bg group-hover:animate-pulse"></span>
+            </button>
+            <button class="relative p-2 text-slate-400 hover:text-white transition-colors md:hidden" onclick="router.navigate('explore')">
+                <i class="fa-solid fa-magnifying-glass text-xl"></i>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-orange-400 p-[2px] cursor-pointer hover:scale-105 transition-transform" onclick="router.navigate('profile')">
+                <img src="https://i.pravatar.cc/150?u=me" alt="Profile" class="rounded-full w-full h-full object-cover border-2 border-dark-bg">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="max-w-7xl mx-auto pt-20 pb-10 px-0 md:px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Sidebar -->
+        <aside class="hidden lg:block lg:col-span-3 sticky top-24 h-[calc(100vh-6rem)]">
+            <div class="flex flex-col gap-2">
+                <!-- Home Dropdown -->
+                <div class="relative" id="home-dropdown-container">
+                    <button onclick="toggleHomeDropdown()" class="nav-item w-full flex items-center justify-between px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="home">
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-house text-xl group-hover:scale-110 transition-transform"></i>
+                            <span class="font-semibold">Home</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-sm transition-transform" id="home-dropdown-icon"></i>
+                    </button>
+                    
+                    <div id="home-dropdown-menu" class="dropdown-menu hidden absolute left-0 right-0 mt-1 bg-dark-card border border-dark-border rounded-xl shadow-xl overflow-hidden z-50">
+                        <a href="#" onclick="router.navigate('home1'); toggleHomeDropdown()" class="flex items-center gap-3 px-4 py-3 hover:bg-dark-hover transition-colors border-b border-dark-border">
+                            <i class="fa-solid fa-house-user text-brand-500"></i>
+                            <div>
+                                <div class="font-medium text-white">Home Feed</div>
+                                <div class="text-xs text-slate-400">Personalized timeline</div>
+                            </div>
+                        </a>
+                        <a href="#" onclick="router.navigate('home2'); toggleHomeDropdown()" class="flex items-center gap-3 px-4 py-3 hover:bg-dark-hover transition-colors">
+                            <i class="fa-solid fa-compass text-purple-500"></i>
+                            <div>
+                                <div class="font-medium text-white">Discover</div>
+                                <div class="text-xs text-slate-400">Explore new content</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="router.navigate('dashboard')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="dashboard">
+                    <i class="fa-solid fa-chart-pie text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+
+                <a href="#" onclick="router.navigate('explore')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="explore">
+                    <i class="fa-solid fa-hashtag text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Explore</span>
+                </a>
+                <a href="#" onclick="router.navigate('notifications')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="notifications">
+                    <i class="fa-regular fa-bell text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Notifications</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full" id="sidebar-notif-count">3</span>
+                </a>
+                <a href="#" onclick="router.navigate('messages')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="messages">
+                    <i class="fa-regular fa-envelope text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Messages</span>
+                    <span class="ml-auto bg-brand-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">5</span>
+                </a>
+                <a href="#" onclick="router.navigate('bookmarks')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="bookmarks">
+                    <i class="fa-regular fa-bookmark text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Bookmarks</span>
+                </a>
+                <a href="#" onclick="router.navigate('profile')" class="nav-item flex items-center gap-4 px-4 py-3 rounded-xl text-slate-400 hover:bg-dark-card hover:text-white transition-all group" data-page="profile">
+                    <i class="fa-regular fa-user text-xl group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium">Profile</span>
+                </a>
+                
+                <button class="mt-6 w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/30 transition-all transform hover:-translate-y-1 active:scale-95" onclick="openCreatePostModal()">
+                    Create Post
+                </button>
+            </div>
+
+            <div class="mt-auto absolute bottom-0 w-full bg-dark-card p-4 rounded-2xl border border-dark-border flex items-center gap-3 cursor-pointer hover:bg-dark-hover transition-colors" onclick="router.navigate('profile')">
+                <img src="https://i.pravatar.cc/150?u=me" class="w-10 h-10 rounded-full">
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-bold text-white truncate">Alex Designer</h4>
+                    <p class="text-xs text-slate-400 truncate">@alex_ui</p>
+                </div>
+                <i class="fa-solid fa-ellipsis text-slate-400"></i>
+            </div>
+        </aside>
+
+        <!-- Dynamic Content Area -->
+        <main class="col-span-1 lg:col-span-6 flex flex-col gap-6 min-h-screen" id="main-content">
+            <!-- Content injected by router -->
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="hidden lg:block lg:col-span-3 sticky top-24 h-fit" id="right-sidebar">
+            <!-- Dynamic right sidebar content -->
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark-card border-t border-dark-border mt-20 py-12 hidden md:block">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-3 cursor-pointer group" onclick="router.navigate('home')">
+
+<img src="image/logo-white.png" 
+alt="Satackly Logo"
+class="h-10 w-auto object-contain hover:scale-105 transition">
+
+</div>
+                    <p class="text-slate-400 text-sm mb-4">Connect, share, and discover with the next generation of social networking.</p>
+                    <div class="flex gap-4">
+                        <a href="404.html" class="w-10 h-10 rounded-full bg-dark-hover flex items-center justify-center text-slate-400 hover:text-white hover:bg-brand-600 transition-all">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
+                        <a href="404.html" class="w-10 h-10 rounded-full bg-dark-hover flex items-center justify-center text-slate-400 hover:text-white hover:bg-brand-600 transition-all">
+                            <i class="fa-brands fa-facebook"></i>
+                        </a>
+                        <a href="404.html" class="w-10 h-10 rounded-full bg-dark-hover flex items-center justify-center text-slate-400 hover:text-white hover:bg-brand-600 transition-all">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="404.html" class="w-10 h-10 rounded-full bg-dark-hover flex items-center justify-center text-slate-400 hover:text-white hover:bg-brand-600 transition-all">
+                            <i class="fa-brands fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">About Us</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Careers</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Brand Resources</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Advertising</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Community</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Satackly for Good</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Creator Hub</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Community Guidelines</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Help Center</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Privacy Policy</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Terms of Service</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Cookie Policy</a></li>
+                        <li><a href="404.html" class="hover:text-brand-500 transition-colors">Accessibility</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-dark-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm">© 2026 Satackly . All rights reserved.</p>
+                <div class="flex gap-6 text-sm text-slate-500">
+                    <a href="404.html" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="404.html" class="hover:text-white transition-colors">Terms</a>
+                    <a href="404.html" class="hover:text-white transition-colors">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Nav -->
+    <div class="fixed bottom-0 w-full bg-dark-bg/90 backdrop-blur-lg border-t border-dark-border flex justify-around items-center py-3 md:hidden z-50 pb-safe">
+        <div class="relative">
+            <a href="#" onclick="toggleMobileHomeDropdown(event)" class="text-brand-500 text-xl flex flex-col items-center" id="mobile-nav-home">
+                <i class="fa-solid fa-house"></i>
+                <span class="text-[10px] mt-1">Home</span>
+            </a>
+            <div id="mobile-home-dropdown" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-dark-card border border-dark-border rounded-xl shadow-xl overflow-hidden w-40">
+                <a href="#" onclick="router.navigate('home1'); toggleMobileHomeDropdown(event)" class="block px-4 py-3 text-sm text-white hover:bg-dark-hover border-b border-dark-border">
+                    <i class="fa-solid fa-house-user mr-2 text-brand-500"></i>Feed
+                </a>
+                <a href="#" onclick="router.navigate('home2'); toggleMobileHomeDropdown(event)" class="block px-4 py-3 text-sm text-white hover:bg-dark-hover">
+                    <i class="fa-solid fa-compass mr-2 text-purple-500"></i>Discover
+                </a>
+            </div>
+        </div>
+        <a href="#" onclick="router.navigate('dashboard')" class="text-slate-400 hover:text-white text-xl flex flex-col items-center" id="mobile-nav-dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span class="text-[10px] mt-1">Stats</span>
+        </a>
+        <a href="#" onclick="router.navigate('explore')" class="text-slate-400 hover:text-white text-xl flex flex-col items-center" id="mobile-nav-explore">
+            <i class="fa-solid fa-hashtag"></i>
+            <span class="text-[10px] mt-1">Explore</span>
+        </a>
+        <a href="#" onclick="router.navigate('notifications')" class="text-slate-400 hover:text-white text-xl relative flex flex-col items-center" id="mobile-nav-notifications">
+            <i class="fa-regular fa-bell"></i>
+            <span class="text-[10px] mt-1">Notifs</span>
+            <span class="absolute top-0 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        </a>
+        <a href="#" onclick="router.navigate('messages')" class="text-slate-400 hover:text-white text-xl flex flex-col items-center" id="mobile-nav-messages">
+            <i class="fa-regular fa-envelope"></i>
+            <span class="text-[10px] mt-1">Messages</span>
+        </a>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-20 md:bottom-10 right-4 md:right-10 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-md p-8 transform transition-all scale-95 opacity-0 relative" id="login-modal-content">
+            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-brand-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-bolt text-white text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Welcome to Satackly</h2>
+                <p class="text-slate-400">Sign in to connect with the world</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Email or Username</label>
+                    <input type="text" class="w-full bg-dark-bg border border-dark-border rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-brand-500 transition-all" placeholder="Enter your email" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" class="w-full bg-dark-bg border border-dark-border rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-brand-500 transition-all" placeholder="Enter your password" required>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <label class="flex items-center gap-2 text-slate-400 cursor-pointer">
+                        <input type="checkbox" class="rounded bg-dark-bg border-dark-border text-brand-500 focus:ring-brand-500">
+                        Remember me
+                    </label>
+                    <a href="#" class="text-brand-500 hover:underline">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-xl transition-all transform hover:-translate-y-0.5">
+                    Log In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-slate-400 text-sm">Don't have an account? <a href="#" class="text-brand-500 hover:underline font-medium">Sign up</a></p>
+            </div>
+
+            <div class="mt-6 flex gap-4">
+                <button class="flex-1 bg-dark-bg border border-dark-border hover:bg-dark-hover text-white py-2 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-google text-red-500"></i> Google
+                </button>
+                <button class="flex-1 bg-dark-bg border border-dark-border hover:bg-dark-hover text-white py-2 rounded-xl transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-apple text-white"></i> Apple
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="create-post-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] hidden items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl w-full max-w-xl p-6 transform transition-all scale-95 opacity-0" id="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Create Post</h3>
+                <button onclick="closeCreatePostModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex gap-4">
+                <img src="https://i.pravatar.cc/150?u=me" class="w-10 h-10 rounded-full">
+                <div class="flex-1">
+                    <textarea id="modal-post-input" placeholder="What's happening?" class="w-full bg-transparent border-none outline-none text-slate-200 text-lg resize-none h-32 placeholder-slate-500"></textarea>
+                    <div class="border-t border-dark-border pt-4 flex justify-between items-center">
+                        <div class="flex gap-2">
+                            <button class="p-2 text-brand-500 hover:bg-brand-500/10 rounded-full"><i class="fa-regular fa-image text-lg"></i></button>
+                            <button class="p-2 text-green-500 hover:bg-green-500/10 rounded-full"><i class="fa-solid fa-gift text-lg"></i></button>
+                            <button class="p-2 text-yellow-500 hover:bg-yellow-500/10 rounded-full"><i class="fa-regular fa-face-smile text-lg"></i></button>
+                        </div>
+                        <button onclick="submitPost()" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-full font-bold disabled:opacity-50" id="modal-post-btn" disabled>Post</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Store
+        const store = {
+            currentUser: {
+                name: "Alex Designer",
+                handle: "@alex_ui",
+                avatar: "https://i.pravatar.cc/150?u=me",
+                bio: "UI/UX Designer | Creating digital experiences that matter ✨",
+                location: "San Francisco, CA",
+                website: "alexd.design",
+                following: 1423,
+                followers: 8934,
+                joined: "March 2020",
+                stats: {
+                    impressions: "45.2K",
+                    profileViews: "2.1K",
+                    mentions: "89",
+                    followersGrowth: "+12%"
+                }
+            },
+            users: [
+                { id: 1, name: "Sarah Jenkins", handle: "@sarah_design", avatar: "https://i.pravatar.cc/150?u=1", verified: true },
+                { id: 2, name: "David Chen", handle: "@dc_crypto", avatar: "https://i.pravatar.cc/150?u=2", verified: false },
+                { id: 3, name: "Elena Rodriguez", handle: "@elena_art", avatar: "https://i.pravatar.cc/150?u=3", verified: true },
+                { id: 4, name: "Tech Insider", handle: "@tech_daily", avatar: "https://i.pravatar.cc/150?u=4", verified: true },
+                { id: 5, name: "Marcus Johnson", handle: "@marcus_fit", avatar: "https://i.pravatar.cc/150?u=5", verified: false }
+            ],
+            posts: [
+                {
+                    id: 101,
+                    userId: 1,
+                    content: "Just finished the new dashboard design! Loving the dark mode vibes. 🌑✨ What do you think about the glassmorphism trend?",
+                    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                    likes: 342,
+                    comments: 56,
+                    shares: 12,
+                    time: "2h ago",
+                    liked: false,
+                    bookmarked: false,
+                    trending: false,
+                    category: "design"
+                },
+                {
+                    id: 102,
+                    userId: 3,
+                    content: "Morning coffee and sketching session. There's something magical about analog tools in a digital world. ☕️🎨",
+                    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                    likes: 89,
+                    comments: 12,
+                    shares: 2,
+                    time: "5h ago",
+                    liked: false,
+                    bookmarked: true,
+                    trending: false,
+                    category: "art"
+                },
+                {
+                    id: 103,
+                    userId: 4,
+                    content: "Breaking: New AI model demonstrates 99% accuracy in code generation. The future of software engineering is changing rapidly. 🧵👇",
+                    image: null,
+                    likes: 1205,
+                    comments: 342,
+                    shares: 890,
+                    time: "4h ago",
+                    liked: true,
+                    bookmarked: false,
+                    trending: true,
+                    category: "tech"
+                },
+                {
+                    id: 104,
+                    userId: 2,
+                    content: "Bitcoin hits new all-time high! 🚀 The crypto market is on fire today. What's your take on the current bull run? #Crypto #Bitcoin",
+                    image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                    likes: 2341,
+                    comments: 567,
+                    shares: 1203,
+                    time: "1h ago",
+                    liked: false,
+                    bookmarked: false,
+                    trending: true,
+                    category: "crypto"
+                },
+                {
+                    id: 105,
+                    userId: 5,
+                    content: "New PR: 315lbs bench press! 💪 Hard work pays off. Never skip leg day folks!",
+                    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                    likes: 567,
+                    comments: 89,
+                    shares: 45,
+                    time: "30m ago",
+                    liked: false,
+                    bookmarked: false,
+                    trending: true,
+                    category: "fitness"
+                }
+            ],
+            notifications: [
+                { id: 1, type: 'like', user: { name: "Sarah Jenkins", avatar: "https://i.pravatar.cc/150?u=1" }, content: "liked your post", time: "2m ago", read: false },
+                { id: 2, type: 'follow', user: { name: "David Chen", avatar: "https://i.pravatar.cc/150?u=2" }, content: "started following you", time: "1h ago", read: false },
+                { id: 3, type: 'mention', user: { name: "Elena Rodriguez", avatar: "https://i.pravatar.cc/150?u=3" }, content: "mentioned you in a comment", time: "3h ago", read: false },
+                { id: 4, type: 'retweet', user: { name: "Tech Insider", avatar: "https://i.pravatar.cc/150?u=4" }, content: "reposted your post", time: "5h ago", read: true }
+            ],
+            messages: [
+                { 
+                    id: 1, 
+                    user: { name: "Sarah Jenkins", avatar: "https://i.pravatar.cc/150?u=1", handle: "@sarah_design" },
+                    lastMessage: "Hey! Are we still on for the design review?",
+                    time: "2m ago",
+                    unread: 2,
+                    online: true,
+                    messages: [
+                        { id: 1, sender: 'them', text: "Hey! Are we still on for the design review?", time: "2:30 PM" },
+                        { id: 2, sender: 'me', text: "Yes, absolutely! 3pm right?", time: "2:32 PM" },
+                        { id: 3, sender: 'them', text: "Perfect, see you then!", time: "2:33 PM" }
+                    ]
+                },
+                { 
+                    id: 2, 
+                    user: { name: "David Chen", avatar: "https://i.pravatar.cc/150?u=2", handle: "@dc_crypto" },
+                    lastMessage: "Check out this new crypto project...",
+                    time: "1h ago",
+                    unread: 0,
+                    online: false,
+                    messages: [
+                        { id: 1, sender: 'them', text: "Check out this new crypto project, looks promising!", time: "1:00 PM" }
+                    ]
+                },
+                { 
+                    id: 3, 
+                    user: { name: "Elena Rodriguez", avatar: "https://i.pravatar.cc/150?u=3", handle: "@elena_art" },
+                    lastMessage: "Love your latest work! 🔥",
+                    time: "3h ago",
+                    unread: 1,
+                    online: true,
+                    messages: [
+                        { id: 1, sender: 'them', text: "Love your latest work! The colors are amazing 🔥", time: "11:00 AM" }
+                    ]
+                }
+            ],
+            bookmarks: [],
+            trends: [
+                { category: "Technology", tag: "#AIRevolution", posts: "125K" },
+                { category: "Design", tag: "Glassmorphism", posts: "45K" },
+                { category: "News", tag: "Mars Mission", posts: "890K" },
+                { category: "Sports", tag: "#WorldCup2026", posts: "2.1M" },
+                { category: "Entertainment", tag: "Dune Part Two", posts: "340K" }
+            ]
+        };
+
+        // Dropdown Functions
+        function toggleHomeDropdown() {
+            const menu = document.getElementById('home-dropdown-menu');
+            const icon = document.getElementById('home-dropdown-icon');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                menu.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function toggleMobileHomeDropdown(e) {
+            e.preventDefault();
+            const menu = document.getElementById('mobile-home-dropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('home-dropdown-container');
+            const menu = document.getElementById('home-dropdown-menu');
+            const icon = document.getElementById('home-dropdown-icon');
+            
+            if (container && !container.contains(e.target)) {
+                menu.classList.add('hidden');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            }
+
+            const mobileDropdown = document.getElementById('mobile-home-dropdown');
+            const mobileNav = document.getElementById('mobile-nav-home');
+            if (mobileDropdown && !mobileNav.contains(e.target)) {
+                mobileDropdown.classList.add('hidden');
+            }
+        });
+
+        // Login Modal Functions
+        function openLoginModal() {
+            const modal = document.getElementById('login-modal');
+            const content = document.getElementById('login-modal-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('login-modal');
+            const content = document.getElementById('login-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            closeLoginModal();
+            showToast('Welcome back, Alex!');
+        }
+
+        // Router
+        const router = {
+            currentPage: 'home',
+            navigate(page) {
+                this.currentPage = page;
+                this.updateActiveNav();
+                this.render(page);
+                window.scrollTo(0, 0);
+            },
+            updateActiveNav() {
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    const page = el.dataset.page;
+                    if (page === 'home' && (this.currentPage === 'home' || this.currentPage === 'home1' || this.currentPage === 'home2')) {
+                        el.classList.remove('text-slate-400');
+                        el.classList.add('bg-dark-card', 'text-white');
+                    } else if (el.dataset.page === this.currentPage) {
+                        el.classList.remove('text-slate-400');
+                        el.classList.add('bg-dark-card', 'text-white');
+                    } else {
+                        el.classList.add('text-slate-400');
+                        el.classList.remove('bg-dark-card', 'text-white');
+                    }
+                });
+                
+                ['home', 'dashboard', 'explore', 'notifications', 'messages'].forEach(p => {
+                    const el = document.getElementById(`mobile-nav-${p}`);
+                    if (el) {
+                        if ((p === 'home' && (this.currentPage === 'home' || this.currentPage === 'home1' || this.currentPage === 'home2')) || p === this.currentPage) {
+                            el.classList.remove('text-slate-400');
+                            el.classList.add('text-brand-500');
+                        } else {
+                            el.classList.add('text-slate-400');
+                            el.classList.remove('text-brand-500');
+                        }
+                    }
+                });
+            },
+            render(page) {
+                const main = document.getElementById('main-content');
+                const rightSidebar = document.getElementById('right-sidebar');
+                
+                switch(page) {
+                    case 'home':
+                    case 'home1':
+                        this.renderHome1(main, rightSidebar);
+                        break;
+                    case 'home2':
+                        this.renderHome2(main, rightSidebar);
+                        break;
+                    case 'dashboard':
+                        this.renderDashboard(main, rightSidebar);
+                        break;
+                    case 'explore':
+                        this.renderExplore(main, rightSidebar);
+                        break;
+                    case 'notifications':
+                        this.renderNotifications(main, rightSidebar);
+                        break;
+                    case 'messages':
+                        this.renderMessages(main, rightSidebar);
+                        break;
+                    case 'bookmarks':
+                        this.renderBookmarks(main, rightSidebar);
+                        break;
+                    case 'profile':
+                        this.renderProfile(main, rightSidebar);
+                        break;
+                }
+            },
+            renderHome1(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="bg-gradient-to-r from-brand-600/20 to-purple-600/20 border border-brand-500/30 rounded-2xl p-6 mb-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                        <h2 class="text-2xl font-bold text-white mb-2 relative z-10">Welcome back, Alex! 👋</h2>
+                        <p class="text-slate-300 relative z-10">Here's what's happening in your network today.</p>
+                    </div>
+
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4 shadow-sm mb-6">
+                        <div class="flex gap-4">
+                            <img src="${store.currentUser.avatar}" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <input type="text" placeholder="What's happening in your world?" 
+                                    class="w-full bg-slate-800/50 border border-dark-border rounded-xl px-4 py-3 text-slate-200 focus:outline-none focus:border-brand-500 transition-all placeholder-slate-500 cursor-pointer"
+                                    onclick="openCreatePostModal()" readonly>
+                                <div class="flex justify-between items-center mt-3">
+                                    <div class="flex gap-2">
+                                        <button class="p-2 text-brand-500 hover:bg-brand-500/10 rounded-full transition-colors"><i class="fa-regular fa-image text-lg"></i></button>
+                                        <button class="p-2 text-green-500 hover:bg-green-500/10 rounded-full transition-colors"><i class="fa-solid fa-gift text-lg"></i></button>
+                                        <button class="p-2 text-yellow-500 hover:bg-yellow-500/10 rounded-full transition-colors"><i class="fa-regular fa-face-smile text-lg"></i></button>
+                                        <button class="p-2 text-purple-500 hover:bg-purple-500/10 rounded-full transition-colors"><i class="fa-solid fa-location-dot text-lg"></i></button>
+                                    </div>
+                                    <button class="bg-brand-600 text-white px-6 py-1.5 rounded-full font-bold text-sm opacity-50 cursor-not-allowed">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 mb-6 overflow-x-auto hide-scrollbar">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 rounded-full p-[2px] border-2 border-dashed border-slate-500 relative cursor-pointer hover:border-brand-500 transition-colors">
+                                <img src="${store.currentUser.avatar}" class="w-full h-full rounded-full object-cover opacity-80">
+                                <div class="absolute bottom-0 right-0 bg-brand-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs border-2 border-dark-card">
+                                    <i class="fa-solid fa-plus"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-center mt-1 text-slate-300">Add Story</p>
+                        </div>
+                        ${store.users.map(user => `
+                            <div class="flex-shrink-0 cursor-pointer group">
+                                <div class="w-16 h-16 rounded-full p-[2px] story-ring group-hover:scale-105 transition-transform">
+                                    <img src="${user.avatar}" class="w-full h-full rounded-full object-cover border-2 border-dark-bg">
+                                </div>
+                                <p class="text-xs text-center mt-1 text-slate-300 truncate w-16">${user.name.split(' ')[0]}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-white">Your Feed</h3>
+                        <div class="flex gap-2">
+                            <button class="text-xs bg-brand-500/20 text-brand-500 px-3 py-1 rounded-full">Latest</button>
+                            <button class="text-xs text-slate-400 hover:text-white px-3 py-1 rounded-full transition-colors">Top</button>
+                        </div>
+                    </div>
+
+                    <div id="feed-posts" class="flex flex-col gap-6"></div>
+                `;
+                
+                const feedPosts = document.getElementById('feed-posts');
+                const personalizedPosts = store.posts.filter(p => p.liked || p.bookmarked || p.comments > 50);
+                personalizedPosts.forEach(post => {
+                    feedPosts.insertAdjacentHTML('beforeend', createPostHTML(post));
+                });
+                
+                rightSidebar.innerHTML = this.getTrendingWidget() + this.getSuggestionsWidget();
+            },
+            renderHome2(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-4">Discover</h2>
+                        <div class="relative mb-6">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" placeholder="Search topics, people, or interests..." 
+                                class="w-full bg-dark-card border border-dark-border rounded-2xl py-4 pl-12 pr-4 text-slate-200 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-lg">
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+                            ${[
+                                { icon: 'fa-palette', name: 'Design', color: 'from-pink-500 to-rose-500' },
+                                { icon: 'fa-code', name: 'Technology', color: 'from-blue-500 to-cyan-500' },
+                                { icon: 'fa-bitcoin-sign', name: 'Crypto', color: 'from-orange-500 to-yellow-500' },
+                                { icon: 'fa-dumbbell', name: 'Fitness', color: 'from-green-500 to-emerald-500' },
+                                { icon: 'fa-music', name: 'Music', color: 'from-purple-500 to-violet-500' },
+                                { icon: 'fa-camera', name: 'Photography', color: 'from-indigo-500 to-blue-500' }
+                            ].map(cat => `
+                                <button class="group relative overflow-hidden rounded-2xl p-4 bg-dark-card border border-dark-border hover:border-purple-500/50 transition-all">
+                                    <div class="absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                                    <i class="fa-solid ${cat.icon} text-2xl mb-2 text-slate-400 group-hover:text-white transition-colors"></i>
+                                    <p class="font-medium text-slate-300 group-hover:text-white">${cat.name}</p>
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <div class="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-2xl p-6 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold text-white">Trending Now</h3>
+                                <span class="text-xs bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full animate-pulse">LIVE</span>
+                            </div>
+                            <div class="space-y-3">
+                                ${store.trends.slice(0, 3).map((trend, i) => `
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-dark-bg/50 hover:bg-dark-bg transition-colors cursor-pointer">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl font-bold text-purple-500/50">0${i + 1}</span>
+                                            <div>
+                                                <p class="font-medium text-white">${trend.tag}</p>
+                                                <p class="text-xs text-slate-400">${trend.posts} posts</p>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-right text-slate-500"></i>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <h3 class="font-bold text-lg text-white mb-4">Popular Now</h3>
+                    </div>
+                    <div id="discover-posts" class="flex flex-col gap-6"></div>
+                `;
+                
+                const discoverPosts = document.getElementById('discover-posts');
+                const trendingPosts = store.posts.filter(p => p.trending).sort((a, b) => b.likes - a.likes);
+                trendingPosts.forEach(post => {
+                    discoverPosts.insertAdjacentHTML('beforeend', createPostHTML(post));
+                });
+                
+                rightSidebar.innerHTML = this.getWhoToFollowWidget() + this.getTrendingWidget(true);
+            },
+            renderDashboard(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-2">Dashboard</h2>
+                        <p class="text-slate-400">Track your performance and analytics</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        ${[
+                            { label: 'Impressions', value: store.currentUser.stats.impressions, change: '+12%', icon: 'fa-eye', color: 'text-blue-500' },
+                            { label: 'Profile Views', value: store.currentUser.stats.profileViews, change: '+8%', icon: 'fa-user', color: 'text-green-500' },
+                            { label: 'Mentions', value: store.currentUser.stats.mentions, change: '+24%', icon: 'fa-at', color: 'text-yellow-500' },
+                            { label: 'Followers', value: store.currentUser.stats.followersGrowth, change: 'this week', icon: 'fa-chart-line', color: 'text-purple-500' }
+                        ].map(stat => `
+                            <div class="bg-dark-card border border-dark-border rounded-2xl p-4 hover:border-brand-500/50 transition-all group">
+                                <div class="flex justify-between items-start mb-2">
+                                    <i class="fa-solid ${stat.icon} ${stat.color} text-xl group-hover:scale-110 transition-transform"></i>
+                                    <span class="text-xs text-green-400 font-medium">${stat.change}</span>
+                                </div>
+                                <p class="text-2xl font-bold text-white mb-1">${stat.value}</p>
+                                <p class="text-xs text-slate-400">${stat.label}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-dark-card border border-dark-border rounded-2xl p-6">
+                            <h3 class="font-bold text-lg text-white mb-4">Activity Overview</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Posts</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-dark-bg rounded-full overflow-hidden">
+                                            <div class="h-full bg-brand-500 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-white">24</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Comments</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-dark-bg rounded-full overflow-hidden">
+                                            <div class="h-full bg-green-500 rounded-full" style="width: 60%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-white">142</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Likes</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-dark-bg rounded-full overflow-hidden">
+                                            <div class="h-full bg-red-500 rounded-full" style="width: 85%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-white">1.2K</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-slate-400">Shares</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-dark-bg rounded-full overflow-hidden">
+                                            <div class="h-full bg-purple-500 rounded-full" style="width: 45%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-white">89</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-dark-card border border-dark-border rounded-2xl p-6">
+                            <h3 class="font-bold text-lg text-white mb-4">Recent Engagement</h3>
+                            <div class="space-y-3">
+                                ${store.posts.slice(0, 3).map(post => {
+                                    const user = store.users.find(u => u.id === post.userId);
+                                    return `
+                                        <div class="flex items-center gap-3 p-3 rounded-xl bg-dark-bg/50 hover:bg-dark-bg transition-colors cursor-pointer">
+                                            <img src="${user.avatar}" class="w-10 h-10 rounded-full">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-white truncate">${post.content.substring(0, 50)}...</p>
+                                                <p class="text-xs text-slate-400">${post.likes} likes · ${post.comments} comments</p>
+                                            </div>
+                                            <span class="text-xs text-slate-500">${post.time}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-6">
+                        <h3 class="font-bold text-lg text-white mb-4">Audience Insights</h3>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="p-4 rounded-xl bg-dark-bg/50">
+                                <p class="text-3xl font-bold text-white mb-1">68%</p>
+                                <p class="text-xs text-slate-400">Mobile Users</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-dark-bg/50">
+                                <p class="text-3xl font-bold text-white mb-1">24-35</p>
+                                <p class="text-xs text-slate-400">Top Age Group</p>
+                            </div>
+                            <div class="p-4 rounded-xl bg-dark-bg/50">
+                                <p class="text-3xl font-bold text-white mb-1">USA</p>
+                                <p class="text-xs text-slate-400">Top Location</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                rightSidebar.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4 mb-6">
+                        <h3 class="font-bold text-lg mb-4">Quick Actions</h3>
+                        <div class="space-y-2">
+                            <button class="w-full text-left px-4 py-3 rounded-xl hover:bg-dark-hover transition-colors flex items-center gap-3 text-slate-300 hover:text-white">
+                                <i class="fa-solid fa-download text-brand-500"></i> Export Data
+                            </button>
+                            <button class="w-full text-left px-4 py-3 rounded-xl hover:bg-dark-hover transition-colors flex items-center gap-3 text-slate-300 hover:text-white">
+                                <i class="fa-solid fa-bullhorn text-green-500"></i> Promote Post
+                            </button>
+                            <button class="w-full text-left px-4 py-3 rounded-xl hover:bg-dark-hover transition-colors flex items-center gap-3 text-slate-300 hover:text-white">
+                                <i class="fa-solid fa-gear text-slate-400"></i> Settings
+                            </button>
+                        </div>
+                    </div>
+                    ${this.getSuggestionsWidget()}
+                `;
+            },
+            renderExplore(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="sticky top-20 z-10 bg-dark-bg/95 backdrop-blur mb-6">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" placeholder="Search for people, topics, or keywords" 
+                                class="w-full bg-dark-card border border-dark-border rounded-full py-3 pl-12 pr-4 text-slate-200 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+                        </div>
+                        <div class="flex gap-6 mt-4 border-b border-dark-border overflow-x-auto hide-scrollbar">
+                            <button class="pb-3 text-brand-500 border-b-2 border-brand-500 font-medium whitespace-nowrap">For You</button>
+                            <button class="pb-3 text-slate-400 hover:text-white font-medium whitespace-nowrap">Trending</button>
+                            <button class="pb-3 text-slate-400 hover:text-white font-medium whitespace-nowrap">News</button>
+                            <button class="pb-3 text-slate-400 hover:text-white font-medium whitespace-nowrap">Sports</button>
+                            <button class="pb-3 text-slate-400 hover:text-white font-medium whitespace-nowrap">Entertainment</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4" id="explore-feed"></div>
+                `;
+                
+                const exploreFeed = document.getElementById('explore-feed');
+                store.posts.forEach(post => {
+                    exploreFeed.insertAdjacentHTML('beforeend', createPostHTML(post));
+                });
+                
+                rightSidebar.innerHTML = this.getTrendingWidget(true);
+            },
+            renderNotifications(main, rightSidebar) {
+                store.notifications.forEach(n => n.read = true);
+                document.getElementById('notif-badge').style.display = 'none';
+                document.getElementById('sidebar-notif-count').style.display = 'none';
+                
+                main.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
+                        <div class="p-4 border-b border-dark-border flex justify-between items-center">
+                            <h2 class="text-xl font-bold">Notifications</h2>
+                            <button class="text-brand-500 text-sm hover:underline" onclick="markAllRead()">Mark all as read</button>
+                        </div>
+                        <div class="flex border-b border-dark-border">
+                            <button class="flex-1 py-3 text-center text-white border-b-2 border-brand-500 font-medium">All</button>
+                            <button class="flex-1 py-3 text-center text-slate-400 hover:text-white font-medium">Mentions</button>
+                        </div>
+                        <div id="notifications-list"></div>
+                    </div>
+                `;
+                
+                const list = document.getElementById('notifications-list');
+                store.notifications.forEach(notif => {
+                    const iconMap = {
+                        'like': 'fa-heart text-red-500',
+                        'follow': 'fa-user text-brand-500',
+                        'mention': 'fa-comment text-green-500',
+                        'retweet': 'fa-retweet text-green-500'
+                    };
+                    
+                    list.insertAdjacentHTML('beforeend', `
+                        <div class="p-4 border-b border-dark-border hover:bg-dark-hover transition-colors flex gap-4 ${notif.read ? '' : 'bg-brand-500/5'}">
+                            <div class="w-10 flex justify-center">
+                                <i class="fa-solid ${iconMap[notif.type]} text-xl mt-1"></i>
+                            </div>
+                            <div class="flex-1">
+                                <img src="${notif.user.avatar}" class="w-10 h-10 rounded-full mb-2">
+                                <p class="text-slate-200">
+                                    <span class="font-bold text-white hover:underline cursor-pointer">${notif.user.name}</span> 
+                                    ${notif.content}
+                                </p>
+                                <span class="text-slate-500 text-sm">${notif.time}</span>
+                            </div>
+                        </div>
+                    `);
+                });
+                
+                rightSidebar.innerHTML = this.getSuggestionsWidget();
+            },
+            renderMessages(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden h-[calc(100vh-8rem)] flex">
+                        <div class="w-full md:w-80 border-r border-dark-border flex flex-col">
+                            <div class="p-4 border-b border-dark-border">
+                                <h2 class="text-xl font-bold mb-4">Messages</h2>
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+                                    <input type="text" placeholder="Search Direct Messages" 
+                                        class="w-full bg-slate-800/50 border border-dark-border rounded-full py-2 pl-10 pr-4 text-sm text-slate-200 focus:outline-none focus:border-brand-500 transition-all">
+                                </div>
+                            </div>
+                            <div class="flex-1 overflow-y-auto" id="conversations-list"></div>
+                        </div>
+                        
+                        <div class="hidden md:flex flex-1 flex-col" id="chat-area">
+                            <div class="p-4 border-b border-dark-border flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <img src="${store.messages[0].user.avatar}" class="w-10 h-10 rounded-full">
+                                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-dark-card"></span>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white">${store.messages[0].user.name}</h3>
+                                        <p class="text-xs text-slate-400">${store.messages[0].user.handle}</p>
+                                    </div>
+                                </div>
+                                <button class="text-slate-400 hover:text-white"><i class="fa-solid fa-circle-info text-xl"></i></button>
+                            </div>
+                            
+                            <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2" id="chat-messages">
+                                ${store.messages[0].messages.map(msg => `
+                                    <div class="message-bubble ${msg.sender === 'me' ? 'message-sent' : 'message-received'}">
+                                        ${msg.text}
+                                        <div class="text-xs opacity-70 mt-1 ${msg.sender === 'me' ? 'text-right' : ''}">${msg.time}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="p-4 border-t border-dark-border">
+                                <div class="flex gap-2">
+                                    <button class="p-2 text-brand-500 hover:bg-brand-500/10 rounded-full"><i class="fa-regular fa-image"></i></button>
+                                    <input type="text" placeholder="Start a new message" 
+                                        class="flex-1 bg-slate-800/50 border border-dark-border rounded-full px-4 py-2 text-slate-200 focus:outline-none focus:border-brand-500 transition-all"
+                                        onkeypress="if(event.key==='Enter') sendMessage(this.value)">
+                                    <button class="p-2 text-brand-500 hover:bg-brand-500/10 rounded-full"><i class="fa-regular fa-face-smile"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="md:hidden flex-1 flex items-center justify-center text-slate-500">
+                            <p>Select a conversation</p>
+                        </div>
+                    </div>
+                `;
+                
+                const convList = document.getElementById('conversations-list');
+                store.messages.forEach(conv => {
+                    convList.insertAdjacentHTML('beforeend', `
+                        <div class="p-4 hover:bg-dark-hover cursor-pointer transition-colors border-b border-dark-border flex gap-3" onclick="openChat(${conv.id})">
+                            <div class="relative">
+                                <img src="${conv.user.avatar}" class="w-12 h-12 rounded-full">
+                                ${conv.online ? '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-dark-card"></span>' : ''}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-baseline">
+                                    <h4 class="font-bold text-white truncate">${conv.user.name}</h4>
+                                    <span class="text-xs text-slate-500">${conv.time}</span>
+                                </div>
+                                <p class="text-sm text-slate-400 truncate">${conv.lastMessage}</p>
+                            </div>
+                            ${conv.unread > 0 ? `<span class="bg-brand-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">${conv.unread}</span>` : ''}
+                        </div>
+                    `);
+                });
+                
+                rightSidebar.innerHTML = '';
+            },
+            renderBookmarks(main, rightSidebar) {
+                const bookmarkedPosts = store.posts.filter(p => p.bookmarked);
+                
+                main.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4 mb-6">
+                        <h2 class="text-xl font-bold mb-2">Bookmarks</h2>
+                        <p class="text-slate-400 text-sm">@${store.currentUser.handle}</p>
+                    </div>
+                    <div id="bookmarks-feed" class="flex flex-col gap-6">
+                        ${bookmarkedPosts.length === 0 ? 
+                            '<div class="text-center py-20 text-slate-500"><i class="fa-regular fa-bookmark text-4xl mb-4"></i><p>You haven\'t bookmarked any posts yet</p></div>' 
+                            : ''}
+                    </div>
+                `;
+                
+                const feed = document.getElementById('bookmarks-feed');
+                bookmarkedPosts.forEach(post => {
+                    feed.insertAdjacentHTML('beforeend', createPostHTML(post));
+                });
+                
+                rightSidebar.innerHTML = this.getSuggestionsWidget();
+            },
+            renderProfile(main, rightSidebar) {
+                main.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
+                        <div class="h-48 bg-gradient-to-r from-brand-600 to-purple-600 relative">
+                            <button class="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm transition-colors">
+                                Edit Profile
+                            </button>
+                        </div>
+                        
+                        <div class="px-6 pb-6">
+                            <div class="flex justify-between items-end -mt-16 mb-4">
+                                <img src="${store.currentUser.avatar}" class="w-32 h-32 rounded-full border-4 border-dark-card">
+                                <button class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-full font-bold transition-colors">Follow</button>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                                    ${store.currentUser.name}
+                                    <i class="fa-solid fa-circle-check text-brand-500 text-lg"></i>
+                                </h1>
+                                <p class="text-slate-400">${store.currentUser.handle}</p>
+                            </div>
+                            
+                            <p class="text-slate-200 mb-4 text-lg">${store.currentUser.bio}</p>
+                            
+                            <div class="flex flex-wrap gap-4 text-slate-400 text-sm mb-6">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${store.currentUser.location}</span>
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-link"></i> <a href="#" class="text-brand-500 hover:underline">${store.currentUser.website}</a></span>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> Joined ${store.currentUser.joined}</span>
+                            </div>
+                            
+                            <div class="flex gap-6 mb-6">
+                                <div class="flex gap-1 cursor-pointer hover:underline">
+                                    <span class="font-bold text-white">${store.currentUser.following.toLocaleString()}</span>
+                                    <span class="text-slate-400">Following</span>
+                                </div>
+                                <div class="flex gap-1 cursor-pointer hover:underline">
+                                    <span class="font-bold text-white">${store.currentUser.followers.toLocaleString()}</span>
+                                    <span class="text-slate-400">Followers</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex border-b border-dark-border">
+                                <button class="flex-1 py-4 text-center text-white border-b-2 border-brand-500 font-bold hover:bg-dark-hover transition-colors">Posts</button>
+                                <button class="flex-1 py-4 text-center text-slate-400 hover:text-white font-medium hover:bg-dark-hover transition-colors">Replies</button>
+                                button class="flex-1 py-4 text-center text-slate-400 hover:text-white font-medium hover:bg-dark-hover transition-colors">Media</button>
+                                <button class="flex-1 py-4 text-center text-slate-400 hover:text-white font-medium hover:bg-dark-hover transition-colors">Likes</button>
+                            </div>
+                        </div>
+                        
+                        <div id="profile-posts"></div>
+                    </div>
+                `;
+                
+                const profilePosts = document.getElementById('profile-posts');
+                const myPosts = store.posts.filter(p => p.userId === 'me' || p.userId === 0);
+                if (myPosts.length === 0) {
+                    profilePosts.innerHTML = '<div class="p-8 text-center text-slate-500">No posts yet</div>';
+                } else {
+                    myPosts.forEach(post => {
+                        profilePosts.insertAdjacentHTML('beforeend', createPostHTML(post));
+                    });
+                }
+                
+                rightSidebar.innerHTML = `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4">
+                        <h3 class="font-bold text-lg mb-4">You might like</h3>
+                        <div class="flex flex-col gap-4">
+                            ${store.users.slice(0, 3).map(user => `
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${user.avatar}" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 hover:underline cursor-pointer">${user.name}</h4>
+                                            <p class="text-xs text-slate-400">${user.handle}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-xs font-bold text-brand-500 hover:bg-brand-500/10 px-3 py-1.5 rounded-full transition-colors" onclick="toggleFollow(this)">Follow</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+            getTrendingWidget(full = false) {
+                const trends = full ? store.trends : store.trends.slice(0, 3);
+                return `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4 mb-6">
+                        <h3 class="font-bold text-lg mb-4 px-2">Trends for you</h3>
+                        <div class="flex flex-col">
+                            ${trends.map(trend => `
+                                <div class="hover:bg-slate-800/50 p-3 rounded-xl cursor-pointer transition-colors">
+                                    <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                        <span>${trend.category} · Trending</span>
+                                        <i class="fa-solid fa-ellipsis hover:text-brand-500"></i>
+                                    </div>
+                                    <h4 class="font-bold text-slate-200">${trend.tag}</h4>
+                                    <p class="text-xs text-slate-400 mt-1">${trend.posts} posts</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${!full ? '<button class="text-brand-500 text-sm mt-2 hover:underline px-2" onclick="router.navigate(\'explore\')">Show more</button>' : ''}
+                    </div>
+                `;
+            },
+            getSuggestionsWidget() {
+                return `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4">
+                        <h3 class="font-bold text-lg mb-4">Who to follow</h3>
+                        <div class="flex flex-col gap-4">
+                            ${store.users.slice(1, 3).map(user => `
+                                <div class="flex items-center justify-between px-2">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${user.avatar}" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 hover:underline cursor-pointer">${user.name}</h4>
+                                            <p class="text-xs text-slate-400">${user.handle}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-xs font-bold text-brand-500 hover:bg-brand-500/10 px-3 py-1.5 rounded-full transition-colors" onclick="toggleFollow(this)">Follow</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+            getWhoToFollowWidget() {
+                return `
+                    <div class="bg-dark-card border border-dark-border rounded-2xl p-4">
+                        <h3 class="font-bold text-lg mb-4">Popular Creators</h3>
+                        <div class="flex flex-col gap-4">
+                            ${store.users.filter(u => u.verified).map(user => `
+                                <div class="flex items-center justify-between px-2">
+                                    <div class="flex items-center gap-3">
+                                        <img src="${user.avatar}" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="text-sm font-bold text-slate-200 hover:underline cursor-pointer flex items-center gap-1">
+                                                ${user.name}
+                                                <i class="fa-solid fa-circle-check text-brand-500 text-xs"></i>
+                                            </h4>
+                                            <p class="text-xs text-slate-400">${user.handle}</p>
+                                        </div>
+                                    </div>
+                                    <button class="text-xs font-bold text-brand-500 hover:bg-brand-500/10 px-3 py-1.5 rounded-full transition-colors" onclick="toggleFollow(this)">Follow</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        function createPostHTML(post) {
+            const user = post.userId === 'me' ? store.currentUser : store.users.find(u => u.id === post.userId) || store.users[0];
+            const likeClass = post.liked ? 'text-red-500 fa-solid' : 'text-slate-400 fa-regular';
+            const bookmarkClass = post.bookmarked ? 'text-brand-500 fa-solid' : 'text-slate-400 fa-regular';
+            
+            return `
+                <article class="bg-dark-card border border-dark-border rounded-2xl p-4 shadow-sm animate-fade-in" id="post-${post.id}">
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0 cursor-pointer" onclick="router.navigate('profile')">
+                            <img src="${user.avatar}" class="w-10 h-10 rounded-full hover:opacity-80 transition-opacity">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center gap-2 cursor-pointer" onclick="router.navigate('profile')">
+                                    <h3 class="font-bold text-slate-200 hover:underline truncate">${user.name}</h3>
+                                    ${user.verified ? '<i class="fa-solid fa-circle-check text-brand-500 text-sm"></i>' : ''}
+                                    <span class="text-slate-400 text-sm truncate">${user.handle}</span>
+                                    <span class="text-slate-500 text-xs">· ${post.time}</span>
+                                </div>
+                                <button class="text-slate-400 hover:text-brand-500 transition-colors">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+                            </div>
+                            
+                            <p class="mt-1 text-slate-300 whitespace-pre-wrap leading-relaxed">${post.content}</p>
+                            
+                            ${post.image ? `
+                                <div class="mt-3 rounded-2xl overflow-hidden border border-dark-border group cursor-pointer">
+                                    <img src="${post.image}" class="w-full h-auto max-h-[500px] object-cover transform group-hover:scale-105 transition-transform duration-500">
+                                </div>
+                            ` : ''}
+                            
+                            <div class="flex justify-between items-center mt-4 max-w-md">
+                                <button class="group flex items-center gap-2 text-slate-400 hover:text-brand-500 transition-colors" onclick="handleComment(this)">
+                                    <div class="p-2 rounded-full group-hover:bg-brand-500/10 transition-colors">
+                                        <i class="fa-regular fa-comment text-lg"></i>
+                                    </div>
+                                    <span class="text-sm group-hover:text-brand-500">${post.comments}</span>
+                                </button>
+                                
+                                <button class="group flex items-center gap-2 text-slate-400 hover:text-green-500 transition-colors" onclick="handleShare(this)">
+                                    <div class="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
+                                        <i class="fa-solid fa-retweet text-lg"></i>
+                                    </div>
+                                    <span class="text-sm group-hover:text-green-500">${post.shares}</span>
+                                </button>
+                                
+                                <button class="group flex items-center gap-2 ${likeClass} hover:text-red-500 transition-colors" onclick="handleLike(this, ${post.id})">
+                                    <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                                        <i class="${likeClass} fa-heart text-lg transition-transform" id="like-icon-${post.id}"></i>
+                                    </div>
+                                    <span class="text-sm group-hover:text-red-500" id="like-count-${post.id}">${post.likes}</span>
+                                </button>
+                                
+                                <button class="group flex items-center gap-2 ${bookmarkClass} hover:text-brand-500 transition-colors" onclick="handleBookmark(this, ${post.id})">
+                                    <div class="p-2 rounded-full group-hover:bg-brand-500/10 transition-colors">
+                                        <i class="${bookmarkClass} fa-bookmark text-lg"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function handleLike(btn, postId) {
+            const post = store.posts.find(p => p.id === postId);
+            const icon = btn.querySelector('i');
+            const countSpan = btn.querySelector('span');
+            
+            if (icon.classList.contains('fa-regular')) {
+                icon.classList.remove('fa-regular', 'text-slate-400');
+                icon.classList.add('fa-solid', 'text-red-500', 'animate-like-bounce');
+                btn.classList.remove('text-slate-400');
+                btn.classList.add('text-red-500');
+                post.likes++;
+                post.liked = true;
+                showToast('Post liked!');
+            } else {
+                icon.classList.remove('fa-solid', 'text-red-500', 'animate-like-bounce');
+                icon.classList.add('fa-regular', 'text-slate-400');
+                btn.classList.remove('text-red-500');
+                btn.classList.add('text-slate-400');
+                post.likes--;
+                post.liked = false;
+            }
+            
+            countSpan.innerText = post.likes;
+            setTimeout(() => icon.classList.remove('animate-like-bounce'), 500);
+        }
+
+        function handleBookmark(btn, postId) {
+            const post = store.posts.find(p => p.id === postId);
+            const icon = btn.querySelector('i');
+            
+            if (icon.classList.contains('fa-regular')) {
+                icon.classList.remove('fa-regular', 'text-slate-400');
+                icon.classList.add('fa-solid', 'text-brand-500');
+                btn.classList.remove('text-slate-400');
+                btn.classList.add('text-brand-500');
+                post.bookmarked = true;
+                showToast('Added to bookmarks');
+            } else {
+                icon.classList.remove('fa-solid', 'text-brand-500');
+                icon.classList.add('fa-regular', 'text-slate-400');
+                btn.classList.remove('text-brand-500');
+                btn.classList.add('text-slate-400');
+                post.bookmarked = false;
+                showToast('Removed from bookmarks');
+            }
+        }
+
+        function handleShare(btn) {
+            const span = btn.querySelector('span');
+            let count = parseInt(span.innerText);
+            span.innerText = count + 1;
+            btn.classList.add('text-green-500');
+            showToast('Reposted to your feed!');
+        }
+
+        function handleComment(btn) {
+            showToast('Comments section expanded');
+        }
+
+        function toggleFollow(btn) {
+            if (btn.innerText === 'Follow') {
+                btn.innerText = 'Following';
+                btn.classList.remove('text-brand-500', 'hover:bg-brand-500/10');
+                btn.classList.add('text-slate-300', 'bg-slate-700', 'hover:bg-slate-600');
+                showToast('You are now following this user');
+            } else {
+                btn.innerText = 'Follow';
+                btn.classList.add('text-brand-500', 'hover:bg-brand-500/10');
+                btn.classList.remove('text-slate-300', 'bg-slate-700', 'hover:bg-slate-600');
+            }
+        }
+
+        function openCreatePostModal() {
+            const modal = document.getElementById('create-post-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            document.getElementById('modal-post-input').focus();
+        }
+
+        function closeCreatePostModal() {
+            const modal = document.getElementById('create-post-modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function submitPost() {
+            const input = document.getElementById('modal-post-input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            const newPost = {
+                id: Date.now(),
+                userId: 'me',
+                content: content,
+                image: null,
+                likes: 0,
+                comments: 0,
+                shares: 0,
+                time: "Just now",
+                liked: false,
+                bookmarked: false,
+                trending: false
+            };
+
+            store.posts.unshift(newPost);
+            
+            if (router.currentPage === 'home' || router.currentPage === 'home1') {
+                const feed = document.getElementById('feed-posts');
+                feed.insertAdjacentHTML('afterbegin', createPostHTML(newPost));
+            }
+            
+            input.value = '';
+            closeCreatePostModal();
+            showToast('Your post was sent!');
+        }
+
+        function openChat(convId) {
+            const conv = store.messages.find(c => c.id === convId);
+            const chatArea = document.getElementById('chat-area');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            chatArea.querySelector('img').src = conv.user.avatar;
+            chatArea.querySelector('h3').textContent = conv.user.name;
+            chatArea.querySelector('p').textContent = conv.user.handle;
+            
+            chatMessages.innerHTML = conv.messages.map(msg => `
+                <div class="message-bubble ${msg.sender === 'me' ? 'message-sent' : 'message-received'} animate-fade-in">
+                    ${msg.text}
+                    <div class="text-xs opacity-70 mt-1 ${msg.sender === 'me' ? 'text-right' : ''}">${msg.time}</div>
+                </div>
+            `).join('');
+            
+            conv.unread = 0;
+            router.render('messages');
+        }
+
+        function sendMessage(text) {
+            if (!text.trim()) return;
+            const chatMessages = document.getElementById('chat-messages');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            chatMessages.insertAdjacentHTML('beforeend', `
+                <div class="message-bubble message-sent animate-slide-in">
+                    ${text}
+                    <div class="text-xs opacity-70 mt-1 text-right">${time}</div>
+                </div>
+            `);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            event.target.value = '';
+            
+            setTimeout(() => {
+                chatMessages.insertAdjacentHTML('beforeend', `
+                    <div class="message-bubble message-received animate-fade-in">
+                        Thanks for your message! 👋
+                        <div class="text-xs opacity-70 mt-1">${time}</div>
+                    </div>
+                `);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 2000);
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-brand-600 text-white px-4 py-3 rounded-xl shadow-lg shadow-brand-500/30 flex items-center gap-3 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-auto min-w-[200px]';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check"></i><span class="font-medium text-sm">${message}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            });
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function markAllRead() {
+            store.notifications.forEach(n => n.read = true);
+            router.render('notifications');
+            showToast('All notifications marked as read');
+        }
+
+        document.getElementById('modal-post-input').addEventListener('input', (e) => {
+            const btn = document.getElementById('modal-post-btn');
+            btn.disabled = e.target.value.trim().length === 0;
+            if (!btn.disabled) {
+                btn.classList.remove('opacity-50');
+            } else {
+                btn.classList.add('opacity-50');
+            }
+        });
+
+        document.getElementById('create-post-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'create-post-modal') closeCreatePostModal();
+        });
+
+        document.getElementById('login-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'login-modal') closeLoginModal();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            router.navigate('home1');
+        });
+    </script>
+</body>
+</html>
